@@ -1,0 +1,51 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_IMAGE = 'django-docker-app'
+    }
+
+    stages {
+        stage('Clone Repository') {
+            steps {
+                git 'https://github.com/your-username/your-repository.git'
+            }
+        }
+
+        stage('Build Docker Images') {
+            steps {
+                script {
+                    sh 'docker-compose -f docker-compose.yml build'
+                }
+            }
+        }
+
+        stage('Deploy with Docker Compose') {
+            steps {
+                script {
+                    sh 'docker-compose -f docker-compose.yml up -d'
+                }
+            }
+        }
+
+        stage('Test Application') {
+            steps {
+                script {
+                    // Wait for Django to start
+                    sh 'sleep 10'
+                    // Test the application
+                    sh 'curl http://localhost:8000'
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Deployment Successful!'
+        }
+        failure {
+            echo 'Deployment Failed!'
+        }
+    }
+}
